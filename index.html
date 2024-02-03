@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Homepage</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+	<style>
+		html, body {
+			height: 100%;
+            width: 100%;
+			margin: 0;
+		}
+		.leaflet-container {
+			height: 100%;
+			width: 100%;
+			max-width: 100%;
+			max-height: 100%;
+		}
+        .leaflet-layer,
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out,
+        .leaflet-control-attribution {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+	</style>
+</head>
+<body>
+<div id="map" style="width: 100%; height: 100%;"></div>
+<script>
+    fetch('https://json.geoiplookup.io/', {
+        method: 'GET',
+    }).then(res => res.json())
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .then(response => {
+        const map = L.map('map').setView([response.latitude, response.longitude], 5);
+
+        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        const marker = L.marker([response.latitude, response.longitude]).addTo(map)
+            .bindPopup(`<b>${response.country_name} 
+                <img src="https://flagcdn.com/16x12/${response.country_code.toLowerCase()}.png" 
+                    srcset="
+                        https://flagcdn.com/32x24/${response.country_code.toLowerCase()}.png 2x, 
+                        https://flagcdn.com/48x36/${response.country_code.toLowerCase()}.png 3x" 
+                    width="16" 
+                    height="12" 
+                    alt="${response.country_name}"> ${response.city}</b>
+                    <br />${response.ip}<br />${response.isp}`).openPopup();
+    });
+</script>
+</body>
+</html>
